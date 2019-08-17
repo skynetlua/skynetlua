@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!-- meta -->
+    <meta charset="utf-8" />
+    <meta name='description' content='<%= config.description %>' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="<%= config.keywords %>"/>
+    <meta name="referrer" content="always" />
+    <% if config.site_icon then %>
+    <link rel="icon" href="<%- config.site_icon %>" type="image/x-icon"/>
+    <% end %>
+    <link rel="stylesheet" href="<%- staticFile('/public/meiru/meiru.css') %>">
+    <title>系统管理后台</title>
+</head>
+<body>
+    <div class="layout">
+        <%- partial('./body') %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!-- meta -->
+    <meta charset="utf-8" />
+    <meta name='description' content='<%- config.description %>' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="<%- config.keywords %>"/>
+    <!-- see http://smerity.com/articles/2013/where_did_all_the_http_referrers_go.html -->
+    <meta name="referrer" content="always" />
+    <% 
+        if config.site_headers then
+            for _,header in ipairs(config.site_headers) do
+                echo(header)
+            end
+        end
+    %>
+
+    <!-- <link title="RSS" type="application/rss+xml" rel="alternate" href="/rss"/> -->    
+    <% if config.site_icon then %>
+    <link rel="icon" href="<%- staticFile(config.site_icon) %>" type="image/x-icon"/>
+    <% end %>
+
+    <link rel="stylesheet" href="<%- staticFile('/public/libs/bootstrap/css/bootstrap.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/stylesheets/common.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/stylesheets/style.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/stylesheets/responsive.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/stylesheets/jquery.atwho.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/libs/editor/editor.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/libs/webuploader/webuploader.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/libs/code-prettify/prettify.css') %>" />
+    <link rel="stylesheet" href="<%- staticFile('/public/libs/font-awesome/css/font-awesome.css') %>" />
+
+    <script type="text/javascript" src="<%- staticFile('/public/libs/jquery-2.1.0.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/lodash.compat.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/jquery-ujs.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/bootstrap/js/bootstrap.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/jquery.caret.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/jquery.atwho.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/markdownit.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/code-prettify/prettify.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/libs/qrcode.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/javascripts/main.js') %>"></script>
+    <script type="text/javascript" src="<%- staticFile('/public/javascripts/responsive.js') %>"></script>
+
+    <% if topic then %>
+    <title><%= topic.title %> - <%- config.name %></title>
+    <% elseif pageTitle then %>
+    <title><%= pageTitle %> - <%- config.name %></title>
+    <% else %>
+    <title><%- config.description %></title>
+    <% end %>
+    <meta content="_csrf" name="csrf-param" />
+    <meta content="<%- csrf %>" name="csrf-token" />
+</head>
+<body>
+<!-- navbar -->
+<div class='navbar'>
+    <div class='navbar-inner'>
+        <div class='container'>
+            <a class='brand' href='/'>
+                <% if config.site_logo then %>
+                    <img src="<%- staticFile(config.site_logo) %>" />
+                <% else %>
+                    <%- config.name %>
+                <% end %>
+            </a>
+            <form id='search_form' class='navbar-search' action="/search?_csrf=<%- csrf %>">
+                <input type='hidden' name='_csrf' value='<%- csrf %>'/>
+                <input type='text' id='q' name='q' class='search-query span3' value=''/>
+            </form>
+            <ul class='nav pull-right'>
+                <li><a href='/'>首页</a></li>
+                <% if current_user then %>
+                <li>
+                    <a href='/my/messages'>
+                        <% if current_user.messages_count then %>
+                        <span class='big messages_count'><%- current_user.messages_count %></span>
+                        <% end %>未读消息
+                    </a>
+                </li>
+                <% end %>
+                <% for _,nav in ipairs(config.site_navs or {}) do %>
+                <li><a href="<%- nav[1] %>" target="<%- nav[2] %>"><%- nav[2] %></a></li>
+                <% end %>
+
+                <% if current_user then %>
+                <li><a href='/setting'>设置</a></li>
+                <li><a href='/signout?_csrf=<%- csrf %>' data-method="post" rel="nofollow">退出</a></li>
+                <% else %>
+                <li><a href='/signup'>注册</a></li>
+                <li><a href='/signin'>登录</a></li>
+                <% end %>
+            </ul>
+            <a class="btn btn-navbar" id="responsive-sidebar-trigger">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div id='main'>
+    <%- body %>
+</div>
+
+<div id='backtotop'>回到顶部</div>
+
+<div id='footer'>
+    <div id='footer_main'>
+        <div class="links">
+            <a class='dark' href='https://github.com/skynetlua/skynetlua'>源码地址</a>
+        </div>
+        <%- partial('./_sponsors') %>
+    </div>
+</div>
+<div id="sidebar-mask"></div>
+
+</body>
+</html>

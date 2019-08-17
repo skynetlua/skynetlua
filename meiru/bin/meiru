@@ -1,0 +1,304 @@
+#!/bin/bash
+
+#脚本执行的文件
+BIN_DIR=$(cd "$(dirname "$0")";pwd)
+#工作目录
+WORK_SPACE=$(pwd)
+SCRIPT=${0}
+
+echo "BIN_DIR:${BIN_DIR}"
+echo "WORK_SPACE:${WORK_SPACE}"
+
+#项目配置文件
+CONFIG_FILE=${1}
+RETVAL=$(echo "${CONFIG_FILE}"|grep /)
+if [[ ! -z ${RETVAL} ]]; then
+	if [[ ! -f ${CONFIG_FILE} ]]; then
+		echo "很抱歉项目文件不存在:${CONFIG_FILE}"
+		exit
+	fi
+	$(dirname "${BIN_DIR}")/skynet/skynet ${@}
+	exit
+fi
+
+forcekill(){
+	COUNT=10
+	while [ ${COUNT} -gt 0 ]
+	do
+		PID=$(ps -ef |grep ${1} |grep -v grep |awk '{print $2}')
+		if [[ ! -z ${PID} ]]; then
+			kill -9 ${PID}
+			echo "forcekill ${1}:${PID}"
+		else
+			break
+		fi
+		sleep 1;COUNT=`expr $COUNT - 1`
+	done
+	COUNT=10
+	while [ ${COUNT} -gt 0 ]
+	do
+		PID=$(ps -ef |grep ${1} |grep -v grep|awk '{print $3}')
+		if [[ ! -z ${PID} ]]; then
+			kill -9 ${PID}
+			echo "forcekill parent ${1}:${PID}"
+		else
+			break
+		fi
+		sleep 1;COUNT=`expr $COUNT - 1`
+	done
+}
+
+check_arg(){
+	PROJECT=${1}
+	PROGRAM=${2}
+	if [[ -z ${PROJECT} || ! -d ${WORK_SPACE}/${PROJECT} ]]; then
+		if [[ ! -z ${PROJECT} && -z ${PROGRAM} ]]; then
+			PROGRAM=${PROJECT}
+		fi
+		PROJECT=main
+		if [[ ! -d ${WORK_SPACE}/${PROJECT} ]]; then
+			for item in ${WORK_SPACE}/* ; do
+				test -d ${item}
+				if [ $? -eq 0 ];then
+					item_name=$(basename ${item})
+					if [[ "${item_name}" != "meiru" ]]; then
+						if [[ -d ${WORK_SPACE}/${item_name}/config ]]; then
+							PROJECT=${item_name}
+							break
+						fi
+					fi
+				fi
+			done
+		fi
+	fi
+	if [[ -z ${PROJECT} ]]; then
+		echo "在路径${WORK_SPACE}上，未找到工程项目"
+		exit
+	fi
+	if [[ -z ${PROGRAM} ]]; then
+		if [[ -f ${WORK_SPACE}/${PROJECT}/config/config.${PROJECT} ]]; then
+			PROGRAM=${PROJECT}
+		else
+			PROGRAM=main
+			if [[ ! -d ${WORK_SPACE}/${PROJECT}/config/config.${PROGRAM} ]]; then
+				for item in ${WORK_SPACE}/${PROJECT}/config/* ; do
+					test -f ${item}
+					if [ $? -eq 0 ];then
+						filename=$(basename ${item})
+						extension="${filename##*.}"
+						filename="${filename%.*}"
+						if [[ "${filename}" = "config" && "${extension}" = "common" ]]; then
+							echo "item=${item}"
+							PROGRAM=${extension}
+							break
+						fi
+					fi
+				done
+			fi
+		fi
+	fi
+	if [[ -z ${PROGRAM} ]]; then
+		echo "在路径${WORK_SPACE}/${PROJECT}/config/上，未找到配置文件config.${PROGRAM}"
+		exit
+	fi
+	CONFIG_FILE=${WORK_SPACE}/${PROJECT}/config/config.${PROGRAM}
+	if [ ! -f ${CONFIG_FILE} ];then
+		echo "配置文件不存在:${CONFIG_FILE}"
+		exit
+	fi
+	DAEMON=$(grep daemon ${CONFIG_FILE}|grep -v "\-\-daemon")
+	if [[ ! -z ${DAEMON} ]]; then
+		DAEMON=$(echo ${DAEMON} | sed 's/^daemon.*=.*"\(.*\)"$/\1/g')
+	fi
+}
+
+start(){
+	if [ ! -f $(dirname "${BIN_DIR}")/skynet/skynet ];then
+		echo "需要编译后，才能运行"
+		echo "先配置，执行命令:${SCRIPT} setup"
+		echo "再编译，执行命令:${SCRIPT} build"
+		echo "若编译错误，尝试执行命令:${SCRIPT} clean"
+		exit
+	fi
+	check_arg ${@}
+	LOGGER=$(grep logger ${CONFIG_FILE}|grep -v "\-\-logger")
+	if [[ ! -z ${LOGGER} ]]; then
+		LOGGER=$(echo ${LOGGER} | sed 's/^logger.*=.*"\(.*\)"$/\1/g')
+		mkdir -p $(dirname "${LOGGER}")
+	fi
+	echo "${PROJECT}-${PROGRAM} start ..."
+	PID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
+	if [[ ! -z ${PID} ]]; then
+		echo "${PROJECT}-${PROGRAM} already started"
+		exit
+	fi
+	echo "$(dirname '${BIN_DIR}')/skynet/skynet ${CONFIG_FILE}"
+	$(dirname "${BIN_DIR}")/skynet/skynet ${CONFIG_FILE}
+	if [[ ! -z ${DAEMON} ]]; then
+		echo "DAEMON=${DAEMON}"
+		sleep 1
+		PID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
+		if [[ ! -z ${PID} ]]; then
+			echo "${PROJECT}-${PROGRAM} started, pid:${PID}"
+		else
+			echo "${PROJECT}-${PROGRAM} start failed!"
+		fi
+	fi
+}
+
+stop(){
+	check_arg ${@}
+	echo "${PROJECT}-${PROGRAM} stop ..."
+	PID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
+	if [[ ! -z ${PID} ]]; then
+		kill ${PID}
+		PRPID=$(ps -ef |grep ${CONFIG_FILE}|grep -v grep |awk '{print $2}')
+		if [[ ! -z ${PRPID} ]]; then
+			echo "kill zombie process, pid:${PRPID}"
+			forcekill ${CONFIG_FILE}
+		fi
+		echo "${PROJECT}-${PROGRAM} stopped, pid:${PID}"
+	else
+		echo "${PROJECT}-${PROGRAM} no run!"
+	fi	
+}
+
+create(){
+	PROJECT=${1}
+	mkdir -p ${WORK_SPACE}/${PROJECT}
+	cp -rf $(dirname "${BIN_DIR}")/template/* ${WORK_SPACE}/${PROJECT}
+	mv ${WORK_SPACE}/${PROJECT}/config/config.test ${WORK_SPACE}/${PROJECT}/config/config.${PROJECT}
+	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/config/config.${PROJECT}
+	sed -i s/test/${PROJECT}/g ${WORK_SPACE}/${PROJECT}/lualib/app.lua
+}
+
+checkexist(){
+	PROGRAM=${1}
+	TYPE=${2}
+	if [[ -z ${TYPE} ]]; then
+		TYPE=app
+	fi
+	if [[ ${TYPE} = "app" ]]; then
+		RET=$(which ${PROGRAM})
+		RET=$(echo ${RET}|grep /${PROGRAM})
+	else
+		RET=$(ldconfig -p |grep ${PROGRAM}.so$)
+	fi
+}
+
+setup_centos(){
+	sudo yum -y install gcc
+	sudo yum -y install autoconf
+	sudo yum -y install readline-devel
+	sudo yum -y install openssl-devel
+}
+
+setup_ubuntu(){
+	sudo apt-get -y install make
+	sudo apt-get -y install gcc
+	sudo apt-get -y install autoconf
+	sudo apt-get -y install gawk
+	sudo apt-get -y install libreadline-dev
+	sudo apt-get -y install libssl-dev
+}
+
+setup_darwin(){
+	checkexist gcc
+	if [[ -z "${RET}" ]]; then
+		echo "need install gcc"
+		exit
+	fi
+	checkexist make
+	if [[ -z "${RET}" ]]; then
+		echo "need install make"
+		exit
+	fi
+	brew install autoconf
+	brew install readline
+	brew install openssl
+}
+
+setup(){
+	while true; do
+		checkexist yum
+		if [[ ! -z "${RET}" ]]; then
+			setup_centos
+			break
+		fi
+		checkexist apt-get
+		if [[ ! -z "${RET}" ]]; then
+			setup_ubuntu
+			break
+		fi
+		break
+		echo "Sorry,NO support install program. feedback to github!"
+		checkexist brew
+		if [[ ! -z "${RET}" ]]; then
+			setup_darwin
+			break
+		fi
+		if [[ "$(uname)" = "Darwin" ]]; then
+			echo "Darwin need install brew"
+			exit
+		fi
+		echo "Sorry,NO support $(uname). feedback to github!"
+		break
+	done
+}
+
+build(){
+	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
+	cd ${SKYNET_DIR}
+	SYSTEM=$(uname)
+	if [[ "${SYSTEM}" = "Darwin" ]]; then
+		SYSTEM="macosx"
+	fi
+	SYSTEM=$(echo $SYSTEM | tr '[A-Z]' '[a-z]')
+	make ${SYSTEM}
+}
+
+buildpbc(){
+	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
+	cd ${SKYNET_DIR}
+	PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	cd ${PBC_DIR}
+	make
+	cd ${PBC_DIR}/binding/lua53
+	make
+	cp ${PBC_DIR}/binding/lua53/protobuf.so ${SKYNET_DIR}/luaclib
+	cp ${PBC_DIR}/binding/lua53/protobuf.lua ${SKYNET_DIR}/lualib
+
+	PBC_DIR=${SKYNET_DIR}/3rd/pbc
+	cd ${PBC_DIR}
+	make clean
+	cd ${PBC_DIR}/binding/lua53
+	make clean
+}
+
+clean(){
+	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
+	cd ${SKYNET_DIR}/
+	make clean
+	cd ${SKYNET_DIR}/3rd/lua
+	make clean
+	cd ${SKYNET_DIR}/3rd/jemalloc
+	make clean
+}
+
+
+case "${1}" in
+	start)shift 1;start ${@};;
+	stop)shift 1;stop ${@};;
+	create)shift 1;create ${@};;
+	kill)shift 1;forcekill ${@};;
+	setup)setup;;
+	build)build;;
+	clean)clean;;
+	buildpbc)buildpbc;;
+	*)echo "Usage : ${0} start|stop|create|kill|setup|build|clean|buildpbc,not ${1}"
+esac
+
+# automake
+# yum install libtool
+# yum install gcc-c++ 
+# ./configure
