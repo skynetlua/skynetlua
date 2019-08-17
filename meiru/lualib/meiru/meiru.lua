@@ -123,7 +123,8 @@ function Meiru:dispatch(req, res)
 		if self.enable_footprint then
 			log("dispatch url:"..req.rawurl)
 			log("dispatch cost_time:" .. (platform.time() - start_time))
-			log(LineChars.."FOOTPRINT"..LineChars..self.node_req:footprint())
+
+			log(LineChars.."FOOTPRINT"..LineChars..(self.node_req:footprint() or 'nothing'))
 		end
 		if ret == nil or ret == false then
 			self:response(res, 404, "Forbidden")
@@ -145,7 +146,7 @@ function Meiru:dispatch(req, res)
 		if self.enable_footprint then
 			logmsg = "dispatch url:"..req.rawurl
 			logmsg = logmsg .."\ndispatch cost_time:" .. (platform.time() - start_time)
-			logmsg = logmsg ..LineChars.."FOOTPRINT"..LineChars..self.node_req:footprint()
+			logmsg = logmsg ..LineChars.."FOOTPRINT"..LineChars..(self.node_req:footprint() or 'nothing')
 		end
 		self:response(res, 404, logmsg.."\n"..errmsg, {['content-type'] = "text/plain;charset=utf-8"})
 	end
@@ -209,6 +210,7 @@ end
 function Meiru:open_footprint(enable)
 	enable = type(enable) ~= 'nil' and enable or true
 	self.enable_footprint = enable
+	log("开启打印访问足迹")
 end
 
 function Meiru:response(res, code, body, header)

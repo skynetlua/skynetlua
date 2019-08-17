@@ -22,9 +22,13 @@ app.data(renderfunc)
 
 app.set("session_secret", config.session_secret)
 
-if os.mode ~= 'dev' then
+
+if os.mode == 'dev' then
+	app.open_footprint()
+else
 	app.set("host", "www.skynetlua.com")
 end
+
 app.use(meiru.static('/public', static_path))
 app.use(meiru.static('/favicon.ico', static_path))
 
@@ -34,13 +38,9 @@ rnode:add(auth.authUser)
 rnode:add(auth.blockUser)
 app.use(rnode)
 
-if os.mode == 'dev' then
-app.open_footprint()
-end
+
 
 app.run()
-
--- dump_instance()
 
 return app
 

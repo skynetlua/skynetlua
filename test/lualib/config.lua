@@ -35,18 +35,18 @@ local config = {
     list_topic_count = 20,
 
     mail_opts = {
-        host  = 'smtp.qq.com',
-        port  = 465,
-        user  = 'skynetlua@foxmail.com',
-        token = '',
-        name  = 'skynetlua'
+        -- host  = 'smtp.qq.com',
+        -- port  = 465,
+        -- user  = '',
+        -- token = '',
+        -- name  = 'skynetlua'
     },
 
     admins = {
         ['linyou'] = true
     },
     GITHUB_OAUTH = {
-        clientID = '',
+        clientID = 'your GITHUB_CLIENT_ID',
         clientSecret = '',
         callbackURL = 'http://www.skynetlua.com/auth/github/callback'
     },
