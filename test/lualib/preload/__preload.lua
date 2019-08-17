@@ -1,5 +1,4 @@
 local skynet = require "skynet"
-os.mode = 'dev'
 
 local function __dump(t, d, dups)
     if type(t) ~= "table" then 
@@ -48,6 +47,11 @@ function skynet.log(...)
         info = "[".. SERVICE_NAME..":"..(info.name or info.what)..os.date(":%y-%m-%d %X") .."]"
     end
  	skynet.error(info, output)
+end
+
+local debug = skynet.getenv("debug")
+if debug then
+    os.mode = 'dev'
 end
 
 require "meiru.extension"
