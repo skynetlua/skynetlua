@@ -21,16 +21,16 @@ local function assign(user, profile)
     user.githubUsername = profile.login
     user.githubAccessToken = profile.access_token
     if is_empty_string(user.location) then
-        user.location = profile.location
+        user.location = profile.location and tostring(profile.location) or ""
     end
     if is_empty_string(user.avatar) then
-        user.avatar = profile.avatar_url
+        user.avatar = profile.avatar_url and tostring(profile.avatar_url) or ""
     end
     if is_empty_string(user.url) then
         if is_empty_string(profile.blog) then
-            user.url = profile.html_url
+            user.url = profile.html_url and tostring(profile.html_url) or ""
         else
-            user.url = profile.blog
+            user.url = profile.blog and tostring(profile.blog) or ""
         end
     end
     if is_empty_string(user.email) then
@@ -39,7 +39,7 @@ local function assign(user, profile)
                 user.email = profile.email[1]
             end
         else
-            user.email = profile.email
+            user.email = profile.email and tostring(profile.email) or ""
         end
     end
 end
