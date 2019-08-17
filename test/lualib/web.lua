@@ -26,7 +26,7 @@ app.set("session_secret", config.session_secret)
 if os.mode == 'dev' then
 	app.open_footprint()
 else
-	app.set("host", "www.skynetlua.com")
+	-- app.set("host", "www.skynetlua.com")
 end
 
 app.use(meiru.static('/public', static_path))
