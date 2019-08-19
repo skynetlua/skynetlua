@@ -279,9 +279,13 @@ clean(){
 	SKYNET_DIR=$(dirname "${BIN_DIR}")/skynet
 	cd ${SKYNET_DIR}/
 	make clean
-	cd ${SKYNET_DIR}/3rd/lua
-	make clean
+	cd ${SKYNET_DIR}/cservice
+	rm -rf ${SKYNET_DIR}/cservice/*
+	cd ${SKYNET_DIR}/luaclib
+	rm -rf ${SKYNET_DIR}/luaclib/*
 	cd ${SKYNET_DIR}/3rd/jemalloc
+	make clean
+	cd ${SKYNET_DIR}/3rd/lua
 	make clean
 }
 
