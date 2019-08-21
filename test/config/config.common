@@ -24,3 +24,6 @@ assets_path = test_path.."assets/"
 --https验证文件
 certfile = "./test/assets/config/skynetlua.pem"
 keyfile  = "./test/assets/config/skynetlua.key"
+
+--ip查询地址数据库
+ip2region = test_path.."assets/config/ip2region.data"

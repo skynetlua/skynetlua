@@ -100,6 +100,16 @@ end
 
 -----------------------------------------
 -----------------------------------------
+local total_anchor = math.floor(os.time()/1800)
+local _total_times = {}
+local function record_times()
+    local cur_anchor = math.floor(os.time()/1800)
+    if total_anchor ~= cur_anchor then
+        total_anchor = cur_anchor
+    end
+    _total_times[total_anchor] = (_total_times[total_anchor] or 0)+1
+end
+
 local function get_client(ip)
     local client = clientsmap[ip]
     if not client then
@@ -110,6 +120,8 @@ local function get_client(ip)
 end
 
 local function client_enter(fd, addr)
+    record_times()
+
     local ip = addr:match("([^:]+)")
     if blacklists[ip] then
         return
@@ -192,6 +204,10 @@ function command.client_infos()
         table.insert(infos, info)
     end
     return infos
+end
+
+function command.total_times()
+    return _total_times
 end
 
 function command.exit()

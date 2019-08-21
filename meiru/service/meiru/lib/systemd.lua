@@ -2,7 +2,6 @@ local skynet = require "skynet"
 local memory = require "skynet.memory"
 local socket = require "skynet.socket"
 
-
 local _caches = {}
 local function get_data(key)
     local cache = _caches[key]
@@ -28,6 +27,34 @@ local function showDate(ts)
     ts = ts or os.time()
     local date = os.date("*t", ts)
     return os.date("%Y/%m/%d %X", ts)..weak_day_names[date.wday]
+end
+
+
+local _ip2regiond
+local function get_ip2regiond()
+    if not _ip2regiond then
+        local list = skynet.call(".launcher", "lua", "LIST")
+        for address,param in pairs(list) do
+            if param:find("meiru/ip2regiond", 1, true) then
+                _ip2regiond = address
+            end
+        end
+    end
+    return _ip2regiond
+end
+
+local _serverds
+local function get_serverds()
+    if not _serverds then
+        _serverds = {}
+        local list = skynet.call(".launcher", "lua", "LIST")
+        for address, param in pairs(list) do
+            if param:find("meiru/serverd", 1, true) then
+                table.insert(_serverds, address)
+            end
+        end
+    end
+    return _serverds
 end
 
 -------------------------------------------------
@@ -114,22 +141,62 @@ function command.net_stat()
 end
 
 function command.client_stat()
-    local list = skynet.call(".launcher", "lua", "LIST")
+    local ips = {}
     local clients = {}
+    local ip2client = {}
     local id = 1
-    for address,param in pairs(list) do
-        if param:find("meiru/serverd", 1, true) then
-            local client_infos = skynet.call(address, "lua", "client_infos")
-            for _,info in ipairs(client_infos) do
-                table.insert(clients, info)
-                info.slaveid = skynet.address(info.slaveid)
-                info.last_visit_time = showDate(info.last_visit_time)
-                info.id = id
-                id = id+1
+    local serverds = get_serverds()
+    for _,serverd in ipairs(serverds) do
+        local client_infos = skynet.call(serverd, "lua", "client_infos")
+        for _,info in ipairs(client_infos) do
+            table.insert(clients, info)
+            info.slaveid = skynet.address(info.slaveid)
+            info.last_visit_time = showDate(info.last_visit_time)
+            info.id = id
+            if info.ip then
+                ip2client[info.ip] = info
+                table.insert(ips, info.ip)
             end
+            id = id+1
+        end
+    end
+
+    local ip2regiond = get_ip2regiond()
+    if ip2regiond then
+        local ips2addrs = skynet.call(ip2regiond, "lua", "ips2region", ips)
+        local client
+        for ip,addr in pairs(ips2addrs) do
+            client = ip2client[ip]
+            client.address = addr
         end
     end
     return clients
+end
+
+function command.online_stat()
+    local serverds = get_serverds()
+    local onlines = {}
+    for _,serverd in ipairs(serverds) do
+        local total_times = skynet.call(serverd, "lua", "total_times")
+        for minute,times in pairs(total_times) do
+            onlines[minute] = (onlines[minute] or 0)+times
+        end
+    end
+    local minutes = {}
+    for minute,_ in pairs(onlines) do
+        table.insert(minutes, minute)
+    end
+    table.sort(minutes)
+    local start_idx = 1
+    if #minutes > 60 then
+        start_idx = #minutes-60
+    end
+    local rets = {}
+    for i=start_idx,#minutes do
+        local minute = minutes[i]
+        table.insert(rets, {os.date("%x %H:%M", minute*1800), onlines[minute]})
+    end
+    return rets
 end
 
 skynet.start(function()

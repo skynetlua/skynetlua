@@ -144,7 +144,7 @@ function Meiru:dispatch(req, res)
 				errmsg = errmsg.."\nRender chunk:\n"..renerror.chunk
 			end
 		end
-
+		log(logmsg.."\n"..errmsg)
 		self:response(res, 404, logmsg.."\n"..errmsg, {['content-type'] = "text/plain;charset=utf-8"})
 	end
 end
