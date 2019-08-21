@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!-- meta -->
+    <meta charset="utf-8" />
+    <meta name='description' content='<%- config.description %>' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="keywords" content="<%- config.keywords %>" />
+    <!-- see http://smerity.com/articles/2013/where_did_all_the_http_referrers_go.html -->
+    <meta name="referrer" content="always" />
+    <link rel="stylesheet" href="<%- staticFile('/public/tutorial/css/meiru.css') %>">
+</head>
+<body class="docs">
+    <div id="mobile-bar">
+        <a class="menu-button"></a>
+        <a class="logo" href="https://cn.vuejs.org/"></a>
+    </div>
+    <div id="header">
+        <%- partial('./header') %>
+    </div>
+    <div id="main" class="fix-sidebar">
+        <div class="sidebar">
+            <%- partial('./sidebar') %>
+        </div>
+        <div class="content guide with-sidebar index-guide">
+            <%- partial('./content') %>
+        </div>
+    </div>
+</body>

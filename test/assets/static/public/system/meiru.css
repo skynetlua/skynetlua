@@ -1,0 +1,137 @@
+body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #304455;
+    background-color: #fff;
+    margin: 0;
+}
+
+
+a {
+    text-decoration: none;
+    color: #304455;
+}
+
+img {
+    border: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+strong {
+    font-weight: 600;
+    color: #273849;
+}
+
+/*header==>>*/
+.meiru-header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 40px;
+    padding: 10px 60px;
+    z-index: 100;
+    transition: background-color 0.3s ease-in-out;
+    box-shadow: 0 0 1px 0px rgba(0, 0, 0, 0.3), 0 0 6px 2px rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 1);
+}
+.meiru-logo {
+    display: inline-block;
+    font-size: 1.5em;
+    line-height: 40px;
+    color: #ffffff;
+    font-family: "Dosis", "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+}
+.meiru-nav {
+    position: fixed;
+    right: 30px;
+    top: 10px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    line-height: 40px;
+/*    display: inline-block;
+*/}
+.meiru-nav-item {
+    display: inline-block;
+    position: relative;
+    margin: 0 0.6em;
+}
+.meiru-nav-item a{
+    color: #ffffff;
+}
+/*header==<<*/
+
+/*body==>>*/
+.meiru-body {
+    position: relative;
+    z-index: 1;
+    /*padding: 0 60px 30px;*/
+    /*overflow-x: hidden;*/
+}
+
+.meiru-sidebar {
+    position: absolute;
+    /*z-index: 10;*/
+    top: 61px;
+    /*left: 0;*/
+    /*bottom: 0;*/
+    /*overflow-x: hidden;*/
+    /*overflow-y: auto;*/
+    /*-webkit-overflow-scrolling: touch;*/
+    /*-ms-overflow-style: none;*/
+}
+
+.meiru-menu {
+    list-style-type: none;
+    margin: 0;
+    width: 220px;
+    line-height: 1.5em;
+    /*padding-left: 1em;*/
+}
+
+.meiru-menu-item {
+    /*margin-top: 0.5em;*/
+    color: #4f5959;
+    line-height: 36px;
+    /*border-left: 5px solid #009E94;*/
+    /*margin: 15px 0 5px;*/
+    margin-left: 15px; 
+    /*margin-right: 15px;*/
+    padding: 0 10px;
+    background-color: #f2f2f2;
+}
+
+
+
+/*.layui-tree li h2 {
+    line-height: 36px;
+    border-left: 5px solid #009E94;
+    margin: 15px 0 5px;
+    padding: 0 10px;
+    background-color: #f2f2f2;
+}*/
+
+/*.sidebar .sidebar-link.current {
+    font-weight: 600;
+    color: #42b983;
+}*/
+
+
+
+
+.meiru-content {
+  position: relative;
+  padding: 2.2em 0;
+  max-width: 700px;
+  margin: 0 auto;
+  padding-left: 50px;
+}
+
+/*body==<<*/
