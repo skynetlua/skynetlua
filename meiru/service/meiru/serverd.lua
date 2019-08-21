@@ -6,7 +6,9 @@ local table  = table
 local string = string
 
 --每个IP，每秒钟，可以访问次数
-local kMCountPerIpPerSecond = 30
+local kMCountPerIpPerSecond = 60
+local kMCountPerIpPerMinute = 60*10
+
 
 local listen_fd 
 local slaves  = {}
@@ -21,7 +23,7 @@ local blacklists = {}
 local function create_slaves(config)
     local instance = config.instance or 1
     for i = 1, instance do
-        local slaveid = skynet.newservice("meiru/agentd", i)
+        local slaveid = skynet.newservice("meiru/agentd", config.services.protocol, i)
         skynet.call(slaveid, "lua", "start", {config = config, master = skynet.self()})
         local slave = {
             slaveid = slaveid,
@@ -51,19 +53,42 @@ function Client:ctor(ip)
     local slave = get_slave()
     self.slave = slave
     self.visit_times = 0
-    self.per_times = 0
-    self.time_anchor = os.time()
+    self.second_times = 0
+    self.minute_times = 0
+
+    self.max_second_times = 0
+    self.max_minute_times = 0
+
+    local curtime = os.time()
+    self.second_anchor = curtime
+    self.minute_anchor = math.floor(curtime/60)
 end
 
 function Client:is_invalid()
     local curtime = os.time()
-    if curtime == self.time_anchor then
-        if self.per_times > kMCountPerIpPerSecond then
+    if curtime == self.second_anchor then
+        if self.second_times > kMCountPerIpPerSecond then
             return true
         end
-        self.per_times = self.per_times+1
+        self.second_times = self.second_times+1
     else
-        self.per_times = 0
+        if self.second_times > self.max_second_times then
+            self.max_second_times = self.second_times
+        end
+        self.second_times = 0
+    end
+
+    curtime = math.floor(curtime/60)
+    if curtime == self.minute_anchor then
+        if self.minute_times > kMCountPerIpPerMinute then
+            return true
+        end
+        self.minute_times = self.minute_times+1
+    else
+        if self.minute_times > self.max_minute_times then
+            self.max_minute_times = self.minute_times
+        end
+        self.minute_times = 0
     end
 end
 
@@ -156,7 +181,15 @@ end
 function command.client_infos()
     local infos = {}
     for _,client in pairs(clientsmap) do
-        infos[client.ip] = client.visit_times
+        local info = {
+            ip    = client.ip,
+            slaveid = client.slave.slaveid,
+            visit_times = client.visit_times,
+            max_stimes  = client.max_second_times,
+            max_mtimes  = client.max_minute_times,
+            last_visit_time = client.last_visit_time,
+        }
+        table.insert(infos, info)
     end
     return infos
 end

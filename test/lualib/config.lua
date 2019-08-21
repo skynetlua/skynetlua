@@ -11,7 +11,7 @@ local config = {
     site_navs = {
         -- 格式 {path, title}
         {'/handbook', '开发手册'},
-        {'/admin',    '管理后台'},
+        {'/system',    '管理后台'},
         {'/project',  '开源项目'},
         {'/about',    '关于'}
     },

@@ -6,10 +6,8 @@ skynet.start(function()
     local fuckforbid = skynet.uniqueservice("common/fuckforbid", ".fuckforbid")
     skynet.name(".fuckforbid", fuckforbid)
 
-    if skynet.getenv("auto_mysql") then
-        local mysqlcheckd = skynet.newservice("meiru/mysqlcheckd")
-        skynet.call(mysqlcheckd, "lua", "start")
-    end
+    local mysqlcheckd = skynet.newservice("meiru/mysqlcheckd")
+    skynet.call(mysqlcheckd, "lua", "start")
 
     local http_port     = skynet.getenv("http_port")
     local service_http  = skynet.getenv("service_http")

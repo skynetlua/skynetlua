@@ -1,12 +1,16 @@
-local skynet = require "skynet"
 local config = require "config"
 
 local exports = {}
 
+
 function exports.index(req, res)
-	local ws_url = "ws://"..req.get('host').."/"
+	local tab = req.query.tab
+	local item = req.query.item	
 	res.set_layout(nil)
-    return res.render('system/index', {ws_url = ws_url})
+    return res.render('system/index', {
+    	cur_tab  = tab,
+    	cur_item = item,
+    })
 end
 
 return exports

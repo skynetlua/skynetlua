@@ -1,16 +1,25 @@
-local Markdown = require "meiru.lib.md"
+-- local Markdown = require "meiru.lib.md"
 local filed = require "meiru.lib.filed"
+local Markdownd = require "meiru.lib.markdownd"
 
 local config = require "config"
 local table = table
 
-local static_host = config.site_static_host or ""
-local static_path = config.static_path or "./test/assets/static/"
+local static_host   = config.site_static_host or ""
+local static_path   = "./test/assets/static/"
+local markdown_path = "./test/assets/markdown/"
 
+--------------------------------------------------
+--exports
+--------------------------------------------------
 local exports = {}
 
-function exports.markdown(text)
-    return '<div class="markdown-text">' .. Markdown(text or '') .. '</div>'
+function exports.markdown_file(path)
+    local retval = Markdownd.markdown_file(markdown_path..path)
+    if retval then
+        return '<div class="markdown-text">' .. retval .. '</div>'
+    end
+    return '<div class="markdown-text"></div>'
 end
 
 function exports.staticFile(filePath)

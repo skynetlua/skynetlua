@@ -9,6 +9,7 @@ local system = require "controller.system"
 local github = require "controller.github"
 local search = require "controller.search"
 local message = require "controller.message"
+local system = require "controller.system"
 
 local auth  = require "component.auth"
 local limit = require "component.limit"
@@ -22,7 +23,7 @@ router.get('/', site.index)
 --static
 router.get('/about', static.about)
 router.get('/handbook', static.handbook)
-router.get('/admin', static.admin)
+router.get('/system', system.index)
 router.get('/project', static.project)
 router.get('/robots.txt', static.robots)
 
@@ -98,8 +99,9 @@ router.post('/reset_pass', sign.updatePass)
 router.get('/setting', auth.userRequired, user.showSetting)
 router.post('/setting', auth.userRequired, user.setting)
 
-local system = require "controller.system"
-router.get('/system/index', system.index)
+local tutorial = require "controller.tutorial"
+
+router.get('/tutorial', tutorial.index)
 
 -- if not config.debug then
 -- 	router.get('/:name', function(req, res)

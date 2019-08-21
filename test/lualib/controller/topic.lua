@@ -26,6 +26,7 @@ function exports.index(req, res)
     if not topic then
         return res.render404('此话题不存在或已被删除。')
     end
+
     topic.visit_count = topic.visit_count+1
     topic:save('visit_count')
     topic.author  = author
@@ -99,7 +100,6 @@ function exports.put(req, res)
         res.status(422)
         return res.render('topic/edit', {edit_error = editError,title = title,content = content,tabs = config.tabs})
     end
-
     title = fuckforbid.cenvert_valid(title)
     content = fuckforbid.cenvert_valid(content)
     local topic = TopicProxy.newAndSave(title, content, tab, req.session.user.id)
@@ -165,6 +165,7 @@ function exports.update(req, res)
         end
         title = fuckforbid.cenvert_valid(title)
         content = fuckforbid.cenvert_valid(content)
+
         topic.title   = title
         topic.content = content
         topic.tab     = tab

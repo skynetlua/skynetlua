@@ -10,12 +10,17 @@
     <% if config.site_icon then %>
     <link rel="icon" href="<%- config.site_icon %>" type="image/x-icon"/>
     <% end %>
-    <link rel="stylesheet" href="<%- staticFile('/public/meiru/meiru.css') %>">
+    <link rel="stylesheet" href="<%- staticFile('/public/system/meiru.css') %>">
+
+    <link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
+    <script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+
     <title>系统管理后台</title>
 </head>
 <body>
-    <div class="layout">
+    <div class="layui-layout layui-layout-admin">
         <%- partial('./body') %>
     </div>
 </body>
 </html>
+

@@ -1,4 +1,3 @@
-local skynet = require "skynet"
 local config = require "config"
 local tools     = require "common.tools"
 local mail      = require "common.mail"
@@ -69,7 +68,8 @@ local notJump = {
     '/active_account',
     '/reset_pass',
     '/signup', 
-    '/search_pass'
+    '/search_pass',
+    '/signin'
 }
 
 function exports.login(req, res)

@@ -1,216 +1,154 @@
 
-<div class="meiru-header">
-	<div class="meiru-logo">系统管理后台</div>
-	<ul class="meiru-nav">
-        <li class="meiru-nav-item"><a href="">服务器详情</a></li>
-        <li class="meiru-nav-item"><a href="">调试信息</a></li>
-        <li class="meiru-nav-item"><a href="">用户</a></li>
+<% 
+	local tab_datas = {
+		{'console', '控制台'}, 
+		{'user', '用户'}
+	}
+	cur_tab = cur_tab or tab_datas[1][1]
+
+	local item_datas_group = {
+		['console'] = {
+			{'service', '服务状况'},
+            {'network', '网络状况'},
+		},
+		['user'] = {
+			{'visit', '访问统计'},
+		}
+	}
+	local item_datas = item_datas_group[cur_tab]
+	cur_item = cur_item or item_datas[1][1]
+	local cur_tab_data
+	local cur_item_data
+ %>
+
+<div class="layui-header">
+    <div class="layui-logo">管理后台</div>
+    <!-- 头部区域（可配合layui已有的水平导航） -->
+    <ul class="layui-nav layui-layout-left">
+    	<% 
+    	for _,tab_data in ipairs(tab_datas) do
+    	if tab_data[1] == cur_tab then
+    		cur_tab_data = tab_data
+    	%>
+    	<li class="layui-nav-item layui-this"><a href="/system?tab=<%- tab_data[1] %>"><%- tab_data[2] %></a></li>
+    	<% else %>
+    	<li class="layui-nav-item"><a href="/system?tab=<%- tab_data[1] %>"><%- tab_data[2] %></a></li>
+    	<% end %>
+    	<% end %>
+    </ul>
+    <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item"><a href="/">首页</a></li>
     </ul>
 </div>
-<div class="meiru-body">
-	<div class="meiru-sidebar">
-		<ul class="meiru-menu">
-	        <li class="meiru-menu-item" id="service_stat"><a href="">服务状况</a></li>
-	        <li class="meiru-menu-item" id="net_stat"><a href="">网络状况</a></li>
-	        <li class="meiru-menu-item" id="memory_stat"><a href="">内存状况</a></li>
-	        <li class="meiru-menu-item" id="visit_stat"><a href="">访问状况</a></li>
-    	</ul>
-	</div>
-	<div class="meiru-content">
-		<div id="panel_stat"></div>
-	</div>
+
+<div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+        <ul class="layui-nav layui-nav-tree" lay-filter="test">
+        <% 
+    	for _,item_data in ipairs(item_datas) do
+    	local href = "/system?tab=" .. cur_tab_data[1] .. "&item=" .. item_data[1]
+    	if item_data[1] == cur_item then
+    		cur_item_data = item_data
+    	%>
+    	<li class="layui-nav-item layui-this"><a href="<%- href %>"><%- item_data[2] %></a></li>
+    	<% else %>
+    	<li class="layui-nav-item"><a href="<%- href %>"><%- item_data[2] %></a></li>
+    	<% end %>
+    	<% end %>
+        </ul>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
-<script src="<%- staticFile('/public/meiru/meiru.js') %>"></script>
+<div class="layui-body">
+    <div style="padding: 15px;">
+    	<strong><h3 id="stat_title"><%- cur_item_data[2] %>表格</h3></strong>
+    	<table id="stat" lay-filter="test"></table>
+    </div>
+</div>
 
+<div class="layui-footer">
+    © <a href="http://www.skynetlua.com">skynetlua</a> - 管理工具
+</div>
 
+<script src="https://www.layuicdn.com/layui/layui.js"></script>
+<!-- <script>
+//JavaScript代码区域
+layui.use('element', function(){
+  // var element = layui.element;
+});
+</script> -->
 <script>
 
+//表结构
+var struct;
+<% if cur_item == "network" then %>
 
+struct = [
+	{field: 'sname', title: '服务ID', width:100},
+	{field: 'param', title: '服务参数', width:90},
+	{field: 'id',    title: 'socketID', width: 80, sort: true},
+	{field: 'type',  title: '类型', width:80},
+	{field: 'peer',  title: '客户端peer', width: 177},
+	{field: 'wbuffer', title: '发送缓冲(kb)', width: 80},
+	{field: 'write', title: '已发数据(kb)', width: 80},
+	{field: 'read',  title: '接收数据(kb)', width: 80},
+	{field: 'rtime', title: '读累计时间(s)', width: 135},
+	{field: 'wtime', title: '写累计时间(s)', width: 135},
+];
 
+<% elseif cur_item == "service" then %>
 
+	struct = [
+		{field: 'sname', title: '服务ID', width:100},
+		{field: 'param', title: '服务参数', width:160},
+		{field: 'cmem',  title: 'C创建内存(kb)', width: 120},
+		{field: 'lmem',  title: 'lua创建内存(kb)', width:130},
+		{field: 'message', title: '累计消息数量', width: 120},
+		{field: 'cpu',   title: '累计CPU耗时(s)', width: 130},
+		{field: 'mqlen', title: '等待队列', width: 100},
+		{field: 'task',  title: '任务数', width: 80},
+	];
 
+<% elseif cur_item == "visit" then %>
+    struct = [
+        {field: 'id', title: '序号ID', width:80},
+        {field: 'ip', title: '终端IP', width:150},
+        {field: 'slaveid',  title: '服务ID', width: 100},
+        {field: 'visit_times',  title: '总访问次数', width:100},
+        {field: 'last_visit_time', title: '最近访问时间', width: 240},
+        {field: 'max_stimes', title: '最大次数每秒', width: 130},
+        {field: 'max_mtimes',   title: '最大次数每分', width: 130},
+    ];
+<% end %>
 
+layui.use('table', function(){
+ 	var table = layui.table;
+ 	table.render({
+    	elem: '#stat',
+    	height: 480,
+    	url: '/api/system/<%- cur_item %>', //数据接口
+    	// page: true, //开启分页
+    	cols: [struct],
+        parseData: function(res){
+            var cur_item = "<%- cur_item %>";
+            if (cur_item == "service") {
+                var total = res.total;
+                var block = res.block;
+                var dom = document.getElementById("stat_title")
+                dom.innerHTML = "<%- cur_item_data[2] %>表格    "+"运行情况("+total+"个block，总内存:"+(total>>20)+"Mb "+(total%1024)+"Kb)";
+            }else if (cur_item == "visit") {
+                var dom = document.getElementById("stat_title")
+                dom.innerHTML = "<%- cur_item_data[2] %>表格    "+"您的IP为:("+res.addr+")";
+            }
+            return {
+              "code": res.code,
+              "msg": res.msg,
+              "count": res.count,
+              "data": res.data
+            };
+        }
+  	});
+});
 </script>
 
 
-
-<script>
-Meiru.views("system", {
-	system_index:function() {
-		Meiru.menu(function(event, idx, menu, item) {
-			// meiru.user.command("menu_item", item.id);
-		});
-
-		var model = this.model("service_stat");
-
-		// if (!model.service_stat) {
-		// }
-
-		this.view("service_stat","system_service_stat", true);
-	},
-
-	service_stat:function(proto) {
-
-
-	}
-});
-
-Meiru.models("system", {
-
-
-});
-
-//system
-Meiru.modules("system", {
-	command:{
-		system_test:function() {
-
-
-		}
-	},
-
-	request:{
-		system_service_stat:function() {
-			return ;
-			// this.send("system_stat_req");
-		}
-	},
-
-	response:{
-		system_service_stat:function() {
-
-			// return ;
-		}
-	},
-
-	trigger:{
-
-	}
-});
-
-
-Meiru.modules("network", {
-	command:{
-		network_open:function() {
-			this.request("system_stat_req");
-		},
-		network_close:function() {
-			log("network.network_close");
-		},
-		network_error:function() {
-			log("network.network_error");
-		},
-		network_message:function(datalen) {
-			log("network.network_message datalen =", datalen);
-		}
-	}
-});
-
-
-window.onload = function(){
-	var ws_url = "<%- ws_url %>";
-	var meiru = new Meiru();
-	meiru.start(ws_url);
-	meiru.view("system_index");
-}
-
-		
-
-// var req = Meiru.module("system", "request");
-
-// 		//response
-// 		var response = {
-// 			system_stat_res:function(proto) {
-// 				var keys = ["sname", "param", "cmem", "lmem", "mqlen", "cpu", "message", "task"];
-// 				var keynames = ["服务id", "启动参数", "C内存(KB)", "lua内存(KB)", "消息等待", "cpu使用时间", "消息数据", "任务数量", "操作"];
-// 				var table = MeiruWidget("table", {class:"layui-table"});
-// 				table.new("caption", "服务运行情况("+proto.block+"个block，总内存:"+(proto.total>>20)+"MB"+(proto.total%1024)+"KB)");
-// 				var tr = table.new("thead").new("tr");
-// 				tr.batch("th", keynames);
-// 				var tbody = table.new("tbody");
-// 				var services_map = {}
-// 				for (var i = 0; i < proto.services.length; i++) {
-// 					var service = proto.services[i];
-// 					services_map[service.sname] = service;
-// 					var values = [];
-// 					for (var j = 0; j < keys.length; j++) {
-// 						var key = keys[j];
-// 						var value = service[key];
-// 						if (value || value == 0) {
-// 							if (key == "cmem" || key == "lmem") {
-// 								values[j] = value.toFixed(3);
-// 							}else{
-// 								values[j] = value;
-// 							}
-// 						}else{
-// 							values[j] = "";
-// 						}
-// 					}
-// 					var tr = tbody.new("tr");
-// 					tr.batch("td", values);
-// 					tr.new("td", "<a href=''>操作</a>");
-// 				}
-// 				table.show('panel_stat');
-// 				var keys = ["sname", "param", "id", "type", "peer", "sock", "read", "write", "wbuffer", "rtime", "wtime"];
-// 				var keynames = ["服务id", "启动参数", "socketID", "类型", "peer", "sock", "读取数据(KB)", "写出数据(KB)", "wbuffer", "rtime", "wtime"];
-
-// 				var table = MeiruWidget("table", {class:"layui-table"});
-// 				var tr = table.new("thead").new("tr");
-// 				tr.batch("th", keynames);
-// 				var tbody = table.new("tbody");
-// 				for (var i = 0; i < proto.netstats.length; i++) {
-// 					var netstat = proto.netstats[i];
-// 					var service = services_map[netstat.sname];
-// 					var values = [];
-// 					for (var j = 0; j < keys.length; j++) {
-// 						var key = keys[j];
-// 						var value = netstat[key];
-// 						if (value || value == 0) {
-// 							if (key == "read" || key == "write") {
-// 								values[j] = value.toFixed(3);
-// 							}else{
-// 								values[j] = value;
-// 							}
-// 						}else{
-// 							if (service){
-// 								values[j] = service[key]?service[key]:"";
-// 							}else{
-// 								values[j] = "";
-// 							}
-// 						}
-// 					}
-// 					var tr = tbody.new("tr");
-// 					tr.batch("td", values);
-// 				}
-// 				table.show('panel_net');
-// 			}
-// 		};
-		
-// 		return {
-// 			command:command,
-// 			request:request,
-// 			response:response
-// 		};
-// 	},
-// 	network:function() {
-// 		var command = {
-// 			network_open:function() {
-// 				this.request("system_stat_req");
-// 			},
-// 			network_close:function() {
-// 				log("network.network_close");
-// 			},
-// 			network_error:function() {
-// 				log("network.network_error");
-// 			},
-// 			network_message:function(datalen) {
-// 				log("network.network_message datalen =", datalen);
-// 			}
-// 		};
-// 		return {command:command};
-// 	}
-// };
-
-</script>

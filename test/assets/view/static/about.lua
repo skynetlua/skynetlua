@@ -10,11 +10,7 @@
     </div>
     <div class='inner topic'>
       <div class="topic_content">
-        <%- markdown([[
-### 关于
-
-
-]]) %>
+        <%- markdown_file("skynetlua/about.md") %>
       </div>
     </div>
   </div>

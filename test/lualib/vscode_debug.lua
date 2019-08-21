@@ -7,6 +7,15 @@ local extension = require "meiru.extension"
 local meiru     = require "meiru.meiru"
 local renderfunc = require "common.renderfunc"
 
+local Markdown = require "meiru.lib.md"
+
+local test = [[本网站是使用(meiru框架)[https://github.com/skynetlua/meiru-skynet]开发。传统破解方式无效。
+        用户的数据都存储在session，只使用了mysql数据库，字符串数据存入数据库是经过编码处理。]]
+local retval = Markdown(test)
+log(retval)
+
+
+
 ---------------------------------------
 --router
 ---------------------------------------
@@ -34,6 +43,7 @@ router.get('tutorial/index', function(req, res)
     -- end
     res.set_layout("")
     return res.render('tutorial/index', {})
+    -- res.send("123")
 end)
 
 ---------------------------------------

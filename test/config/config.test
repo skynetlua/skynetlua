@@ -4,36 +4,31 @@ include "config.common"
 -- 启动配置
 ---------------------------------------------------------------------
 --指定worker线程数量
-thread = 8
+thread  = 8
 --启动守护进程模式，进程id保存到该文件中
 --daemon = "./remote.pid"
 
 --指定日志的输出目录
---logger  = "./log/test.log"
 --logpath = "."
+--logger = "./test/log/test.log"
 
---启动的服务文件,即./lualib/main.lua文件
-start = "main"
+--启动的服务文件
+start     = "main"
 --支持最大的连接数
 maxclient = 20480
 
 ---------------------------------------------------------------------
 --自定义配置
 ---------------------------------------------------------------------
---即./lualib/web.lua文件
-service_http  = "web"
---即./lualib/ws.lua文件
-service_ws    = "ws"
-http_port     = 8080
+service_http = "web"
+service_ws   = "ws"
+http_port    = 8080
 
 --service_https = "web"
 --service_wss   = "ws"
 --https_port    = 8081
 
 service_num = 1
-
---开启自动更新mysql文件
-auto_mysql = 1
 
 --开启debug模式
 debug = 1

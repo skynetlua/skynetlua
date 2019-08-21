@@ -51,8 +51,7 @@ function exports.auth(req, res)
 		log("github user failed. path =", path)
 		return false
 	end
-	log("github body =", body)
-
+	-- log("github body =", body)
 	local tmp = Coder.decode(body)
 	tmp.access_token = profile.access_token
 	

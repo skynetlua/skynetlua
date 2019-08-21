@@ -185,9 +185,7 @@ end
 
 -- function Meiru:dispatch(req, res)
 -- 	self.is_working = true
-
 -- 	local start_time = platform.time()
-
 -- 	local ret = self.node_req:dispatch(req, res)
 -- 	res.req_ret = res.is_end or ret
 -- 	res.is_end = nil

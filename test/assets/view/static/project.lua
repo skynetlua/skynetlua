@@ -10,9 +10,7 @@
     </div>
     <div class='inner topic'>
       <div class="topic_content">
-        <%- markdown([[
-## 开源项目正在开发中，近期发布，敬请期待。
-]]) %>
+        <%- markdown_file("skynetlua/project.md") %>
       </div>
     </div>
   </div>
