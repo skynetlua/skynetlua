@@ -27,7 +27,7 @@
                     topics       = topics,
                     page_num     = page_num,
                     current_page = current_page,
-                    base_path    = '/'
+                    base    = '/'
                 }) %>
             </div>
         <% else %>
