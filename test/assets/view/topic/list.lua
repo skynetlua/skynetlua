@@ -4,7 +4,7 @@
 
 <div class='pagination' current_page='<%- current_page %>'>
   <ul>
-    <% local base_url = base_path .. (base_path:find('?', 1, true) and  '&' or  '?') .. 'tab=' .. tab .. '&page=' %>
+    <% local base_url = base .. (base:find('?', 1, true) and  '&' or  '?') .. 'tab=' .. tab .. '&page=' %>
     <% if current_page == 1 then %>
     <li class='disabled'><a>«</a></li>
     <% else %>
